@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import Task from './Task';
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { toggleTask, filterTasks } from './actions';
 
 const ListTask = () => {
   const tasks = useSelector(state => state.tasks);
-  const [filter, setFilter] = useState('all');
+  const filter = useSelector(state => state.filter);
+  const dispatch = useDispatch();
 
-  const filteredTasks = filter === 'done' ? tasks.filter(task => task.isDone) : 
-                        filter === 'not' ? tasks.filter(task => !task.isDone) : tasks;
+  const filteredTasks = tasks.filter(task => filter === 'all' || (filter === 'done' && task.isDone) || (filter === 'notDone' && !task.isDone));
 
   return (
     <div>
-      <div>
-        <button onClick={() => setFilter('all')}>All</button>
-        <button onClick={() => setFilter('done')}>Done</button>
-        <button onClick={() => setFilter('not')}>Not Done</button>
-      </div>
+      <select onChange={(e) => dispatch(filterTasks(e.target.value))}>
+        <option value="all">All</option>
+        <option value="done">Done</option>
+        <option value="notDone">Not Done</option>
+      </select>
       <ul>
         {filteredTasks.map(task => (
-          <Task key={task.id} task={task} />
+          <li key={task.id} onClick={() => dispatch(toggleTask(task.id))} style={{ textDecoration: task.isDone ? 'line-through' : 'none' }}>
+            {task.description}
+          </li>
         ))}
       </ul>
     </div>
